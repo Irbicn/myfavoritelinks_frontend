@@ -2,19 +2,42 @@ import { localStorageSave } from '../utils/helpers';
 import Users from '../utils/users';
 import logo from '../img/logo.png';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 export default function Signin() {
   const nav = useNavigate();
+  const [message, setMessage] = useState('');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const email = e.target[0].value;
     const password = e.target[1].value;
-    const data = await Users.signin({ password, email });
-    localStorageSave('token', data);
-    nav('/links');
+    const { token, message } = await Users.signin({ password, email });
+    if (token) {
+      localStorageSave('token', token);
+      nav('/links');
+    } else if (message) {
+      setMessage(message);
+    } else {
+      setMessage('An error ocurred, please try again later');
+    }
   };
   return (
     <div className="container p-4">
+      {message && (
+        <div className="col-md-4 mx-auto">
+          <div className="alert alert-warning alert-dismissible fade show d-flex justify-content-between">
+            <span>{message}</span>
+            <span
+              type="button"
+              className="close"
+              onClick={() => setMessage('')}
+            >
+              &times;
+            </span>
+          </div>
+        </div>
+      )}
       <div className="row">
         <div className="col-md-4 mx-auto">
           <div className="card text-center">
